@@ -22,18 +22,19 @@
 (defn getCodeCommentWithString 
   "return the comment of the code passed in"
   [code fileExtension]
-  (if (or (= fileExtension "cs") (= fileExtension "js"))
+  (case fileExtension 
+    ("cs" "js") 
     (into (getCodeCommentByStartAndEnd "//" "\n" #"//" #"\n" code)
           (getCodeCommentByStartAndEnd "/*" "*/" #"/\*" #"\*/" code))
-    (if (= fileExtension "cshtml")
-      (into (getCodeCommentByStartAndEnd "@*" "*@" #"@\*" #"\*@" code)
-            (getCodeCommentByStartAndEnd "<!--" "-->" #"<!--" #"-->" code))
-      (if (= fileExtension "xml")
-        (getCodeCommentByStartAndEnd "<!--" "-->" #"<!--" #"-->" code)
-        (if (= fileExtension "html")
-          (getCodeCommentByStartAndEnd "<!--" "-->" #"<!--" #"-->" code)
-          (if (= fileExtension "css")
-            (getCodeCommentByStartAndEnd "/*" "*/" #"/\*" #"\*/" code)))))))
+    "cshtml"
+    (into (getCodeCommentByStartAndEnd "@*" "*@" #"@\*" #"\*@" code)
+          (getCodeCommentByStartAndEnd "<!--" "-->" #"<!--" #"-->" code))
+    "xml"
+    (getCodeCommentByStartAndEnd "<!--" "-->" #"<!--" #"-->" code)
+    "html"
+    (getCodeCommentByStartAndEnd "<!--" "-->" #"<!--" #"-->" code)
+    "css"
+    (getCodeCommentByStartAndEnd "/*" "*/" #"/\*" #"\*/" code)))
 
 (defn codeCommentWithFile
   "return the comment part of the file passed in"
