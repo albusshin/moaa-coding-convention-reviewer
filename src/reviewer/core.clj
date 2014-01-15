@@ -3,6 +3,23 @@
   (:gen-class))
 
 (defn codeComment
+  "return the comment part of the file passed in"
+  [filename]
+  (do (def fileExtension (last (clojure.contrib.string/split #"\." filename)))
+      (def code (slurp filename))
+    (if (= fileExtension "cs")
+      (if (clojure.contrib.string/substring? "//" code)
+        (loop [sections (rest (clojure.contrib.string/split #"//" code))
+               section (first sections)
+               comments []]
+          (if (= section nil)
+            comments
+            (recur (rest sections) 
+                   (first (rest sections))
+                   (conj comments (first (clojure.contrib.string/split #"\n" section)))))))) ;return the comments identified by "//"
+      ));TODO not .cs file extension
+
+#_(defn codeComment
   "return the comment part of code passed in"
   [code fileExtension]
   (if (= fileExtension "cs")
