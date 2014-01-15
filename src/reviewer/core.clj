@@ -2,20 +2,29 @@
   (:require clojure.contrib.string)
   (:gen-class))
 
+(defn reload
+  []
+  (use 'reviewer.core :reload))
+
+(defn getCodeCommentByStartAndEnd
+  "detect the code comment by starting and ending characters"
+  [start end startpattern endpattern code]
+  (if (clojure.contrib.string/substring? start code)
+    (loop [sections (rest (clojure.contrib.string/split startpattern code))
+           section (first sections)
+           comments []]
+      (if (= section nil)
+        comments
+        (recur (rest sections)
+               (first (rest sections))
+               (conj comments (first (clojure.contrib.string/split endpattern section))))))))
+
 (defn codeCommentWithString 
-  ""
+  "return the comment of the code passed in"
   [code fileExtension]
   (if (= fileExtension "cs")
-      (if (clojure.contrib.string/substring? "//" code)
-        (loop [sections (rest (clojure.contrib.string/split #"//" code))
-               section (first sections)
-               comments []]
-          (if (= section nil)
-            comments
-            (recur (rest sections) 
-                   (first (rest sections))
-                   (conj comments (first (clojure.contrib.string/split #"\n" section))))))
-        [""] )))
+    (into (getCodeCommentByStartAndEnd "//" "\n" #"//" #"\n" code)
+          (getCodeCommentByStartAndEnd "/*" "*/" #"/\*" #"\*/" code))))
 
 (defn codeCommentWithFile
   "return the comment part of the file passed in"
@@ -25,6 +34,17 @@
     (codeCommentWithString code fileExtension)
      ;return the comments identified by "//"
       ));TODO not .cs file extension
+
+(defn hasUnfinishedTodos?
+  "return if the current file has unfinished TODOs inside"
+  [filename]
+  (loop [comments (codeCommentWithFile filename)
+         hasUnfinishedTodos false]
+    (if (= (first comments) nil)
+      false
+        (if (clojure.contrib.string/substring? "todo" (clojure.string/lower-case (first comments)))
+          true
+          (recur (rest comments) false)))))
 
 (defn unfinishedTodos
   "Find all unfinished TODOs in current file and then add a comment emphasizing the task"
