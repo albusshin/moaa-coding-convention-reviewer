@@ -19,19 +19,28 @@
                (first (rest sections))
                (conj comments (first (clojure.contrib.string/split endpattern section))))))))
 
-(defn codeCommentWithString 
+(defn getCodeCommentWithString 
   "return the comment of the code passed in"
   [code fileExtension]
-  (if (= fileExtension "cs")
+  (if (or (= fileExtension "cs") (= fileExtension "js"))
     (into (getCodeCommentByStartAndEnd "//" "\n" #"//" #"\n" code)
-          (getCodeCommentByStartAndEnd "/*" "*/" #"/\*" #"\*/" code))))
+          (getCodeCommentByStartAndEnd "/*" "*/" #"/\*" #"\*/" code))
+    (if (= fileExtension "cshtml")
+      (into (getCodeCommentByStartAndEnd "@*" "*@" #"@\*" #"\*@" code)
+            (getCodeCommentByStartAndEnd "<!--" "-->" #"<!--" #"-->" code))
+      (if (= fileExtension "xml")
+        (getCodeCommentByStartAndEnd "<!--" "-->" #"<!--" #"-->" code)
+        (if (= fileExtension "html")
+          (getCodeCommentByStartAndEnd "<!--" "-->" #"<!--" #"-->" code)
+          (if (= fileExtension "css")
+            (getCodeCommentByStartAndEnd "/*" "*/" #"/\*" #"\*/" code)))))))
 
 (defn codeCommentWithFile
   "return the comment part of the file passed in"
   [filename]
   (let [fileExtension (last (clojure.contrib.string/split #"\." filename))
       code (slurp filename)]
-    (codeCommentWithString code fileExtension)
+    (getCodeCommentWithString code fileExtension)
      ;return the comments identified by "//"
       ));TODO not .cs file extension
 
@@ -52,7 +61,7 @@
   (do (def lines [])
     (with-open [rdr (clojure.java.io/reader filename)]
       (doseq [line (line-seq rdr)]
-        (if (clojure.contrib.string/substring? "todo" (first (codeCommentWithString (clojure.string/lower-case line)
+        (if (clojure.contrib.string/substring? "todo" (first (getCodeCommentWithString (clojure.string/lower-case line)
                                                                                     (last (clojure.contrib.string/split #"\." filename)))))
           (def lines (conj lines (str line " !unfinished TODO" )))
           (def lines (conj lines line)))))
