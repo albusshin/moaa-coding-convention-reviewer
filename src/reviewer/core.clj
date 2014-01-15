@@ -8,16 +8,16 @@
 
 (defn getCodeCommentByStartAndEnd
   "detect the code comment by starting and ending characters"
-  [start end startpattern endpattern code]
+  [start end startPattern endPattern code]
   (if (clojure.contrib.string/substring? start code)
-    (loop [sections (rest (clojure.contrib.string/split startpattern code))
+    (loop [sections (rest (clojure.contrib.string/split startPattern code))
            section (first sections)
            comments []]
       (if (= section nil)
         comments
         (recur (rest sections)
                (first (rest sections))
-               (conj comments (first (clojure.contrib.string/split endpattern section))))))))
+               (conj comments (first (clojure.contrib.string/split endPattern section))))))))
 
 (defn getCodeCommentWithString 
   "return the comment of the code passed in"
