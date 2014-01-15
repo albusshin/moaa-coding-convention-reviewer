@@ -10,4 +10,4 @@ Download from http://github.com/albusshin/Reviewer
 
 Copyright © 2014 Albus Shin
 
-Distributed under the Eclipse Public License either version 1.0
+Distributed under the Eclipse Public License version 1.0
