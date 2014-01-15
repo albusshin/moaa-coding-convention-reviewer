@@ -36,14 +36,14 @@
                                                                                     (last (clojure.contrib.string/split #"\." filename)))))
           (def lines (conj lines (str line " !unfinished TODO" )))
           (def lines (conj lines line)))))
-    (with-open [wrtr #_(clojure.java.io/writer "/home/albus/Desktop/dummy")
+    (with-open [wrtr (clojure.java.io/writer "/home/albus/Desktop/dummy")
                 #_(clojure.java.io/writer "C:\\Users\\xinti\\Desktop\\dummy")
-               (clojure.java.io/writer filename) ]
+               #_(clojure.java.io/writer filename) ]
       (doseq [line lines]
         (.write wrtr (str line "\n"))))))
 
 (defn -main
   [& args]
-  #_(unfinishedTodos "/home/albus/Desktop/ChartererController.cs")
-  (unfinishedTodos "C:\\Users\\xinti\\Desktop\\ChartererController.cs")
+  (unfinishedTodos "/home/albus/Desktop/ChartererController.cs")
+  #_(unfinishedTodos "C:\\Users\\xinti\\Desktop\\ChartererController.cs")
   #_(unfinishedTodos "C:\\Users\\xinti\\Desktop\\List.cshtml"))
