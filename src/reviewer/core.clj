@@ -47,4 +47,5 @@
 (defn -main
   [& args]
   #_(unfinishedTodos "/home/albus/Desktop/ChartererController.cs")
-  (unfinishedTodos "C:\\Users\\xinti\\Desktop\\ChartererController.cs"))
+  #_(unfinishedTodos "C:\\Users\\xinti\\Desktop\\ChartererController.cs")
+  (unfinishedTodos "C:\\Users\\xinti\\Desktop\\List.cshtml"))
