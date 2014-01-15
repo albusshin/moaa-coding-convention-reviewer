@@ -19,15 +19,6 @@
                    (conj comments (first (clojure.contrib.string/split #"\n" section)))))))) ;return the comments identified by "//"
       ));TODO not .cs file extension
 
-#_(defn codeComment
-  "return the comment part of code passed in"
-  [code fileExtension]
-  (if (= fileExtension "cs")
-    (if(clojure.contrib.string/substring? "//" code)
-      (rest(clojure.contrib.string/split #"//" code))
-      [""])
-    ()))
-
 (defn unfinishedTodos
   "Find all unfinished TODOs in current file and then add a comment emphasizing the task"
   [filename]
