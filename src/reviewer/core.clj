@@ -16,11 +16,11 @@
     (with-open [rdr (clojure.java.io/reader filename)]
       (doseq [line (line-seq rdr)]
         (if (clojure.contrib.string/substring? "todo" (first (codeComment (clojure.string/lower-case line))))
-          (conj lines (concat line "! unfinished TODO" ))
-          (conj lines line))))
+          (def lines (conj lines (str line "! unfinished TODO" )))
+          (def lines (conj lines line))))))
     (with-open [wrtr (clojure.java.io/writer "/home/albus/Desktop/dummy")]
       (doseq [line lines]
-        (.write wrtr line)))))
+        (.write wrtr (str line "\n")))))
 
 (defn -main
   [& args]
