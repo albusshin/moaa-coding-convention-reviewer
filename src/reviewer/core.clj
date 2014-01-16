@@ -9,35 +9,18 @@
   []
   (use 'reviewer.core :reload))
 
-(defn getCodeCommentByStartAndEnd
-  "detect the code comment by starting and ending characters"
-  [start end startPattern endPattern code]
-  (if (substring? start code)
-    (loop [sections (rest (split code startPattern))
-           section (first sections)
-           comments []]
-      (if (= section nil)
-        comments
-        (recur (rest sections)
-               (first (rest sections))
-               (conj comments (first (split section endPattern))))))))
-
 (defn getCodeCommentWithString 
   "return the comment of the code passed in"
   [code fileExtension]
   (case fileExtension 
     ("cs" "js") 
-    (into (getCodeCommentByStartAndEnd "//" "\n" #"//" #"\n" code)
-          (getCodeCommentByStartAndEnd "/*" "*/" #"/\*" #"\*/" code))
+    (re-seq #"(?:/\*(?:[^*]|(?:\*+[^*/]))*\*+/)|(?://.*)" code)
     "cshtml"
-    (into (getCodeCommentByStartAndEnd "@*" "*@" #"@\*" #"\*@" code)
-          (getCodeCommentByStartAndEnd "<!--" "-->" #"<!--" #"-->" code))
-    "xml"
-    (getCodeCommentByStartAndEnd "<!--" "-->" #"<!--" #"-->" code)
-    "html"
-    (getCodeCommentByStartAndEnd "<!--" "-->" #"<!--" #"-->" code)
+    (re-seq #"(?:@\*(?:[^*]|(?:\*+[^*@]))*\*+@)|<!--.*?-->" code)
+    ("xml" "html")
+    (re-seq #"<!--.*?-->" code)
     "css"
-    (getCodeCommentByStartAndEnd "/*" "*/" #"/\*" #"\*/" code)))
+    (re-seq #"(?:/\*(?:[^*]|(?:\*+[^*/]))*\*+/)" code)))
 
 (defn codeCommentWithFile
   "return the comment part of the file passed in"
