@@ -27,9 +27,7 @@
   [filename]
   (let [fileExtension (last (split filename #"\."))
       code (slurp filename)]
-    (getCodeCommentWithString code fileExtension)
-     ;return the comments identified by "//"
-      ));TODO not .cs file extension
+    (getCodeCommentWithString code fileExtension)))
 
 (defn hasUnfinishedTodosByFile?
   "return if the current file has unfinished TODOs inside"
@@ -45,7 +43,13 @@
 (defn hasUnfinishedTodosInComments?
   "return if the code passed in has unfinished TODOs inside"
   [comments]
-  (some  #(substring? "todo" %) (map lower-case comments)))
+  (let [comments (map lower-case comments)]
+    (every? true? 
+            [(some  #(substring? "todo" %) comments)
+             (not-any? #(substring? "later" %) comments)
+             (not-any? #(substring? "postpone" %) comments)
+             (not-any? #(substring? "defer" %) comments)])))
+
 
 (defn unfinishedTodos
   "Find all unfinished TODOs in current file and then add a comment emphasizing the task"
