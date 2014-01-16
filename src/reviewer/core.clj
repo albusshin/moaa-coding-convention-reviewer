@@ -1,6 +1,9 @@
 (ns reviewer.core
-  (:require clojure.contrib.string)
   (:gen-class))
+(use 'clojure.string)
+
+(defn substring? [sub st]
+  (not= (.indexOf st sub) -1))
 
 (defn reload
   []
@@ -9,15 +12,15 @@
 (defn getCodeCommentByStartAndEnd
   "detect the code comment by starting and ending characters"
   [start end startPattern endPattern code]
-  (if (clojure.contrib.string/substring? start code)
-    (loop [sections (rest (clojure.contrib.string/split startPattern code))
+  (if (substring? start code)
+    (loop [sections (rest (split code startPattern))
            section (first sections)
            comments []]
       (if (= section nil)
         comments
         (recur (rest sections)
                (first (rest sections))
-               (conj comments (first (clojure.contrib.string/split endPattern section))))))))
+               (conj comments (first (split section endPattern))))))))
 
 (defn getCodeCommentWithString 
   "return the comment of the code passed in"
@@ -39,7 +42,7 @@
 (defn codeCommentWithFile
   "return the comment part of the file passed in"
   [filename]
-  (let [fileExtension (last (clojure.contrib.string/split #"\." filename))
+  (let [fileExtension (last (split filename #"\."))
       code (slurp filename)]
     (getCodeCommentWithString code fileExtension)
      ;return the comments identified by "//"
@@ -52,14 +55,14 @@
          hasUnfinishedTodos false]
     (if (= (first comments) nil)
       false
-        (if (clojure.contrib.string/substring? "todo" (clojure.string/lower-case (first comments)))
+        (if (substring? "todo" (lower-case (first comments)))
           true
           (recur (rest comments) false)))))
 
 (defn hasUnfinishedTodosInComments?
   "return if the code passed in has unfinished TODOs inside"
   [comments]
-  (some (fn [codecomment] (clojure.contrib.string/substring? "todo" codecomment)) (map clojure.string/lower-case comments)))
+  (some  #(substring? "todo" %) (map lower-case comments)))
 
 (defn unfinishedTodos
   "Find all unfinished TODOs in current file and then add a comment emphasizing the task"
@@ -67,8 +70,8 @@
   (do (def lines [])
     (with-open [rdr (clojure.java.io/reader filename)]
       (doseq [line (line-seq rdr)]
-        (if (clojure.contrib.string/substring? "todo" (first (getCodeCommentWithString (clojure.string/lower-case line)
-                   (last (clojure.contrib.string/split #"\." filename)))))
+        (if (substring? "todo" (first (getCodeCommentWithString (lower-case line)
+                   (last (split filename #"\.")))))
           (def lines (conj lines (str line " !unfinished TODO" )))
           (def lines (conj lines line)))))
     (with-open [wrtr (clojure.java.io/writer "/home/albus/Desktop/dummy")
@@ -79,6 +82,6 @@
 
 (defn -main
   [& args]
-  #_(unfinishedTodos "/home/albus/Desktop/ChartererController.cs")
-  (unfinishedTodos "C:\\Users\\xinti\\Desktop\\ChartererController.cs")
+  (unfinishedTodos "/home/albus/Desktop/ChartererController.cs")
+  #_(unfinishedTodos "C:\\Users\\xinti\\Desktop\\ChartererController.cs")
   #_(unfinishedTodos "C:\\Users\\xinti\\Desktop\\List.cshtml"))
