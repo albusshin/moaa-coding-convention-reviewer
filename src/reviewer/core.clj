@@ -45,7 +45,7 @@
      ;return the comments identified by "//"
       ));TODO not .cs file extension
 
-(defn hasUnfinishedTodos?
+(defn hasUnfinishedTodosByFile?
   "return if the current file has unfinished TODOs inside"
   [filename]
   (loop [comments (codeCommentWithFile filename)
@@ -56,6 +56,11 @@
           true
           (recur (rest comments) false)))))
 
+(defn hasUnfinishedTodosInComments?
+  "return if the code passed in has unfinished TODOs inside"
+  [comments]
+  (not(empty? (filter #(clojure.contrib.string/substring? "todo") (clojure.string/lower-case (first comments))))))
+
 (defn unfinishedTodos
   "Find all unfinished TODOs in current file and then add a comment emphasizing the task"
   [filename]
@@ -63,7 +68,7 @@
     (with-open [rdr (clojure.java.io/reader filename)]
       (doseq [line (line-seq rdr)]
         (if (clojure.contrib.string/substring? "todo" (first (getCodeCommentWithString (clojure.string/lower-case line)
-                                                                                    (last (clojure.contrib.string/split #"\." filename)))))
+                   (last (clojure.contrib.string/split #"\." filename)))))
           (def lines (conj lines (str line " !unfinished TODO" )))
           (def lines (conj lines line)))))
     (with-open [wrtr (clojure.java.io/writer "/home/albus/Desktop/dummy")
@@ -74,6 +79,6 @@
 
 (defn -main
   [& args]
-  (unfinishedTodos "/home/albus/Desktop/ChartererController.cs")
-  #_(unfinishedTodos "C:\\Users\\xinti\\Desktop\\ChartererController.cs")
+  #_(unfinishedTodos "/home/albus/Desktop/ChartererController.cs")
+  (unfinishedTodos "C:\\Users\\xinti\\Desktop\\ChartererController.cs")
   #_(unfinishedTodos "C:\\Users\\xinti\\Desktop\\List.cshtml"))

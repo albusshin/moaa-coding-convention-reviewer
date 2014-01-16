@@ -60,3 +60,12 @@
          (into #{} (getCodeCommentWithString "//bar\nabcdefg/*foo*/fdsa" "js"))))
     (is nil?
         (getCodeCommentWithString "abcdefg" "js"))))
+
+(deftest testHasUnfinishedTodosInComments
+  (testing "test if hasUnfinishedTodosInComments? work properly"
+    (is (hasUnfinishedTodosInComments? ["TODO check bug"]))
+    (is (hasUnfinishedTodosInComments? ["see, todo"]))
+    (is (hasUnfinishedTodosInComments? ["Check TODO"]))
+    (is (not (hasUnfinishedTodosInComments? ["TODO later"])))
+    (is (not (hasUnfinishedTodosInComments? ["TODO late"])))
+    (is (not (hasUnfinishedTodosInComments? ["TODO defer"])))))
