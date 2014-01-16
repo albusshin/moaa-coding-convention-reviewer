@@ -59,7 +59,7 @@
 (defn hasUnfinishedTodosInComments?
   "return if the code passed in has unfinished TODOs inside"
   [comments]
-  (not(empty? (filter #(clojure.contrib.string/substring? "todo") (clojure.string/lower-case (first comments))))))
+  (some (fn [codecomment] (clojure.contrib.string/substring? "todo" codecomment)) (map clojure.string/lower-case comments)))
 
 (defn unfinishedTodos
   "Find all unfinished TODOs in current file and then add a comment emphasizing the task"
