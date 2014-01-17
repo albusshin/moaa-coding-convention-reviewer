@@ -2,70 +2,72 @@
   (:require [clojure.test :refer :all]
             [reviewer.core :refer :all]))
 
-(deftest testGetCodeCommentWithCsFile
-  (testing "test if getCodeCommentWithString returns correct value with .cs files"
+(deftest test-code-comment-with-cs-file
+  (testing "test if code-comments returns correct value with .cs files"
     (is (= ["//foo"]
-         (getCodeCommentWithString "C#Code//foo\nGetAll()" "cs")))
+         (code-comments "C#Code//foo\nGetAll()" "cs")))
     (is (= ["//bar"]
-         (getCodeCommentWithString "//bar" "cs")))
+         (code-comments "//bar" "cs")))
     (is (= #{"/*foo*/" "//bar"}
-         (into #{} (getCodeCommentWithString "//bar\nabcdefg/*foo*/fdsa" "cs"))))
+         (into #{} (code-comments "//bar\nabcdefg/*foo*/fdsa" "cs"))))
     (is (nil?
-         (getCodeCommentWithString "abcdefg" "cs")))))
+         (code-comments "abcdefg" "cs")))))
 
 
-(deftest testGetCodeCommentWithCshtmlFile
-  (testing "test if getCodeCommentWithString returns correct value with .cshtml files"
+(deftest test-code-comment-with-cshtml-file
+  (testing "test if code-comments returns correct value with .cshtml files"
     (is (= ["<!--foo-->"]
-         (getCodeCommentWithString "C#View Code<!--foo-->Display(x => x.Name)" "cshtml")))
+         (code-comments "C#View Code<!--foo-->Display(x => x.Name)" "cshtml")))
     (is (= ["@*bar*@"]
-         (getCodeCommentWithString "//b<!baaaaaar@*bar*@ar" "cshtml")))
+         (code-comments "//b<!baaaaaar@*bar*@ar" "cshtml")))
     (is (= #{"@*foo*@" "<!--bar-->"}
-         (into #{} (getCodeCommentWithString "<Whateveritis<!--bar-->AndDisplayx=>x.Name@*foo*@fdsa" "cshtml"))))
+         (into #{} (code-comments "<Whateveritis<!--bar-->AndDisplayx=>x.Name@*foo*@fdsa" "cshtml"))))
     (is nil?
-        (getCodeCommentWithString "abcdefg" "cshtml"))))
+        (code-comments "abcdefg" "cshtml"))))
 
-(deftest testGetCodeCommentWithHtmlFile
-  (testing "test if getCodeCommentWithString returns correct value with .html files"
+(deftest test-code-comment-with-html-file
+  (testing "test if code-comments returns correct value with .html files"
     (is (= ["<!--foo-->"]
-         (getCodeCommentWithString "C#View Code<!--foo-->Display(x => x.Name)" "html")))
+         (code-comments "C#View Code<!--foo-->Display(x => x.Name)" "html")))
     (is (= #{"<!--foo-->" "<!--bar-->"}
-         (into #{} (getCodeCommentWithString "<What<!--foo-->everitis<!--bar-->AndDisplayx=>x.Name@*foo*@fdsa" "html"))))
+         (into #{} (code-comments "<What<!--foo-->everitis<!--bar-->AndDisplayx=>x.Name@*foo*@fdsa" "html"))))
     (is nil?
-        (getCodeCommentWithString "abcdefg" "html"))))
+        (code-comments "abcdefg" "html"))))
 
-(deftest testGetCodeCommentWithxmlFile
-  (testing "test if getCodeCommentWithString returns correct value with .xml files"
+(deftest test-code-comment-with-xml-file
+  (testing "test if code-comments returns correct value with .xml files"
     (is (= ["<!--foo-->"]
-         (getCodeCommentWithString "C#View Code<!--foo-->Display(x => x.Name)" "xml")))
+         (code-comments "C#View Code<!--foo-->Display(x => x.Name)" "xml")))
     (is (= #{"<!--foo-->" "<!--bar-->"}
-         (into #{} (getCodeCommentWithString "<What<!--foo-->everitis<!--bar-->AndDisplayx=>x.Name@*foo*@fdsa" "xml"))))
+         (into #{} (code-comments "<What<!--foo-->everitis<!--bar-->AndDisplayx=>x.Name@*foo*@fdsa" "xml"))))
     (is nil?
-        (getCodeCommentWithString "abcdefg" "xml"))))
+        (code-comments "abcdefg" "xml"))))
 
-(deftest testGetCodeCommentWithCssFile
-  (testing "test if getCodeCommentWithString returns correct value with .css files"
+(deftest test-code-comment-with-css-file
+  (testing "test if code-comments returns correct value with .css files"
     (is (= #{"/*foo*/" "/*bar*/"}
-         (into #{} (getCodeCommentWithString "/*foo*/What the foo is this? /*bar*/ Its a bar" "css"))))
+         (into #{} (code-comments "/*foo*/What the foo is this? /*bar*/ Its a bar" "css"))))
     (is nil?
-        (getCodeCommentWithString "abcdefg" "css"))))
+        (code-comments "abcdefg" "css"))))
 
-(deftest testGetCodeCommentWithJsFile
-  (testing "test if getCodeCommentWithString returns correct value with .js files"
+(deftest test-code-comment-with-js-file
+  (testing "test if code-comments returns correct value with .js files"
     (is (= ["//foo"]
-         (getCodeCommentWithString "C#Code//foo\nGetAll()" "js")))
+         (code-comments "C#Code//foo\nGetAll()" "js")))
     (is (= ["//bar"]
-         (getCodeCommentWithString "//bar" "js")))
+         (code-comments "//bar" "js")))
     (is (= #{"/*foo*/" "//bar"}
-         (into #{} (getCodeCommentWithString "//bar\nabcdefg/*foo*/fdsa" "js"))))
+         (into #{} (code-comments "//bar\nabcdefg/*foo*/fdsa" "js"))))
     (is nil?
-        (getCodeCommentWithString "abcdefg" "js"))))
+        (code-comments "abcdefg" "js"))))
 
-(deftest testHasUnfinishedTodosInComments
-  (testing "test if hasUnfinishedTodosInComments? work properly"
-    (is (hasUnfinishedTodosInComments? ["TODO check bug"]))
-    (is (hasUnfinishedTodosInComments? ["see, todo"]))
-    (is (hasUnfinishedTodosInComments? ["Check TODO"]))
-    (is (not (hasUnfinishedTodosInComments? ["TODO later"])))
-    (is (not (hasUnfinishedTodosInComments? ["TODO postpone"])))
-    (is (not (hasUnfinishedTodosInComments? ["TODO defer"])))))
+(deftest test-unfinished-todos-in?
+  (testing "test if unfinished-todo-in? work properly"
+    (is (unfinished-todo-in? ["TODO check bug"]))
+    (is (unfinished-todo-in? ["see, todo"]))
+    (is (unfinished-todo-in? ["Check TODO"]))
+    (is (not (unfinished-todo-in? ["TODO later"])))
+    (is (not (unfinished-todo-in? ["TODO postpone"])))
+    (is (not (unfinished-todo-in? ["TODO defer"])))
+    (is (every? unfinished-todo-in? [["TODO"] ["todo"] ["tododo"]]))
+    (is (some unfinished-todo-in? [["abc"] ["todo"] ["def"]]))))
