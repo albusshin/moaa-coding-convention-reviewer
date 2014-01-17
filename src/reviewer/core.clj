@@ -9,8 +9,8 @@
   []
   (use 'reviewer.core :reload))
 
-(defn getCodeCommentWithString 
-  "return the comment of the code passed in"
+(defn getCodeCommentsWithString 
+  "return the comment parts of the source code as a string"
   [code fileExtension]
   (case fileExtension 
     ("cs" "js") 
@@ -22,23 +22,17 @@
     "css"
     (re-seq #"(?:/\*(?:[^*]|(?:\*+[^*/]))*\*+/)" code)))
 
-(defn codeCommentWithFile
-  "return the comment part of the file passed in"
+(defn codeCommentsWithFile
+  "return the comment parts of the source code as a file"
   [filename]
   (let [fileExtension (last (split filename #"\."))
       code (slurp filename)]
-    (getCodeCommentWithString code fileExtension)))
+    (getCodeCommentsWithString code fileExtension)))
 
 (defn hasUnfinishedTodosByFile?
   "return if the current file has unfinished TODOs inside"
   [filename]
-  (loop [comments (codeCommentWithFile filename)
-         hasUnfinishedTodos false]
-    (if (= (first comments) nil)
-      false
-        (if (substring? "todo" (lower-case (first comments)))
-          true
-          (recur (rest comments) false)))))
+  (hasUnfinishedTodosInComments? (codeCommentsWithFile filename)))
 
 (defn hasUnfinishedTodosInComments?
   "return if the code passed in has unfinished TODOs inside"
@@ -57,7 +51,7 @@
   (do (def lines [])
     (with-open [rdr (clojure.java.io/reader filename)]
       (doseq [line (line-seq rdr)]
-        (if (substring? "todo" (first (getCodeCommentWithString (lower-case line)
+        (if (substring? "todo" (first (getCodeCommentsWithString (lower-case line)
                    (last (split filename #"\.")))))
           (def lines (conj lines (str line " !unfinished TODO" )))
           (def lines (conj lines line)))))
