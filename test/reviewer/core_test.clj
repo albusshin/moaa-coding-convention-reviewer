@@ -4,45 +4,44 @@
 
 (deftest test-code-comment-with-file-extensions
   (testing "test if code-comments returns correct value with file and file extensions"
-    (is (= ["//foo"] 
-           (code-comments "C#Code//foo\nGetAll()" "cs")))
-    (is (= ["//bar"] 
+    (is (= [{:start 0, :end 5, :group "//foo"}]
+           (code-comments "//foo\nC#CodeGetAll()" "cs")))
+    (is (= [{:start 0, :end 5, :group "//bar"}]
            (code-comments "//bar" "cs")))
-    (is (= #{"/*foo*/" "//bar"} 
-           (into #{} (code-comments "//bar\nabcdefg/*foo*/fdsa" "cs"))))
+    (is (= [{:start 0, :end 5, :group "//bar"} {:start 13, :end 20, :group "/*foo*/"}]
+           (code-comments "//bar\nabcdefg/*foo*/fdsa" "cs")))
     (is (nil? (code-comments "abcdefg" "cs"))))
   (testing "test if code-comments returns correct value with .cshtml files"
-    (is (= ["<!--foo-->"]
+    (is (= [{:start 11, :end 21, :group "<!--foo-->"}]
            (code-comments "C#View Code<!--foo-->Display(x => x.Name)" "cshtml")))
-    (is (= ["@*bar*@"]
-           (code-comments "//b<!baaaaaar@*bar*@ar" "cshtml")))
-    (is (= #{"@*foo*@" "<!--bar-->"}
-           (into #{} (code-comments "<Whateveritis<!--bar-->AndDisplayx=>x.Name@*foo*@fdsa" "cshtml"))))
+    (is (= [{:start 13, :end 20, :group "@*bar*@"}]           (code-comments "//b<!baaaaaar@*bar*@ar" "cshtml")))
+    (is (= [{:start 13, :end 23, :group "<!--bar-->"} {:start 42, :end 49, :group "@*foo*@"}]
+           (code-comments "<Whateveritis<!--bar-->AndDisplayx=>x.Name@*foo*@fdsa" "cshtml")))
     (is nil?
         (code-comments "abcdefg" "cshtml")))
   (testing "test if code-comments returns correct value with .html files"
-    (is (= ["<!--foo-->"]
+    (is (= [{:start 11, :end 21, :group "<!--foo-->"}]
            (code-comments "C#View Code<!--foo-->Display(x => x.Name)" "html")))
-    (is (= #{"<!--foo-->" "<!--bar-->"}
-           (into #{} (code-comments "<What<!--foo-->everitis<!--bar-->AndDisplayx=>x.Name@*foo*@fdsa" "html"))))
+    (is (= [{:start 5, :end 15, :group "<!--foo-->"} {:start 23, :end 33, :group "<!--bar-->"}]
+           (code-comments "<What<!--foo-->everitis<!--bar-->AndDisplayx=>x.Name@*foo*@fdsa" "html")))
     (is nil? (code-comments "abcdefg" "html")))
   (testing "test if code-comments returns correct value with .xml files"
-    (is (= ["<!--foo-->"]
+    #_(is (= [{:start 11, :end 21, :group "<!--foo-->"}]
            (code-comments "C#View Code<!--foo-->Display(x => x.Name)" "xml")))
-    (is (= #{"<!--foo-->" "<!--bar-->"}
-           (into #{} (code-comments "<What<!--foo-->everitis<!--bar-->AndDisplayx=>x.Name@*foo*@fdsa" "xml"))))
+    #_(is (= ({:start 5, :end 15, :group "<!--foo-->"} {:start 23, :end 33, :group "<!--bar-->"})
+           (code-comments "<What<!--foo-->everitis<!--bar-->AndDisplayx=>x.Name@*foo*@fdsa" "xml")))
     (is nil? (code-comments "abcdefg" "xml")))
   (testing "test if code-comments returns correct value with .css files"
-    (is (= #{"/*foo*/" "/*bar*/"}
-           (into #{} (code-comments "/*foo*/What the foo is this? /*bar*/ Its a bar" "css"))))
+    (is (= [{:start 0, :end 7, :group "/*foo*/"} {:start 29, :end 36, :group "/*bar*/"}]
+           (code-comments "/*foo*/What the foo is this? /*bar*/ Its a bar" "css")))
     (is nil? (code-comments "abcdefg" "css")))
   (testing "test if code-comments returns correct value with .js files"
-    (is (= ["//foo"]
+    (is (= [{:start 6, :end 11, :group "//foo"}]
            (code-comments "C#Code//foo\nGetAll()" "js")))
-    (is (= ["//bar"]
+    (is (= [{:start 0, :end 5, :group "//bar"}]
            (code-comments "//bar" "js")))
-    (is (= #{"/*foo*/" "//bar"}
-           (into #{} (code-comments "//bar\nabcdefg/*foo*/fdsa" "js"))))
+    (is (= [{:start 0, :end 5, :group "//bar"} {:start 13, :end 20, :group "/*foo*/"}]
+           (code-comments "//bar\nabcdefg/*foo*/fdsa" "js")))
     (is nil? (code-comments "abcdefg" "js"))))
 
 (deftest test-unfinished-todos-in?

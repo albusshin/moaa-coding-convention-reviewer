@@ -9,18 +9,25 @@
   []
   (use 'reviewer.core :reload))
 
+(defn re-seq-pos [pattern string] 
+  (let [m (re-matcher pattern string)] 
+    ((fn step [] 
+      (when (. m find) 
+        (cons {:start (. m start) :end (. m end) :group (. m group)} 
+          (lazy-seq (step))))))))
+
 (defn code-comments 
   "return the comment parts of the source code as a string or a file"
   ([code file-extension]
   (case file-extension 
-    ("cs" "js") 
-    (re-seq #"(?:/\*(?:[^*]|(?:\*+[^*/]))*\*+/)|(?://.*)" code)
-    "cshtml"
-    (re-seq #"(?:@\*(?:[^*]|(?:\*+[^*@]))*\*+@)|<!--.*?-->" code)
-    ("xml" "html")
-    (re-seq #"<!--.*?-->" code)
-    ("css" "less")
-    (re-seq #"(?:/\*(?:[^*]|(?:\*+[^*/]))*\*+/)" code)))
+    ("cs" "js"),
+    (re-seq-pos #"(?:/\*(?:[^*]|(?:\*+[^*/]))*\*+/)|(?://.*)" code)
+    "cshtml",
+    (re-seq-pos #"(?:@\*(?:[^*]|(?:\*+[^*@]))*\*+@)|<!--.*?-->" code)
+    ("xml" "html"),
+    (re-seq-pos #"<!--.*?-->" code)
+    ("css" "less"),
+    (re-seq-pos #"(?:/\*(?:[^*]|(?:\*+[^*/]))*\*+/)" code)))
   ([filename]
   (let [file-extension (last (split filename #"\."))
       code (slurp filename)]
