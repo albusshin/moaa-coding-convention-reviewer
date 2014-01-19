@@ -46,21 +46,31 @@
 
 (deftest test-unfinished-todo-in?
   (testing "test if unfinished-todo-in? work properly"
-    (is (unfinished-todo-in? "TODO check bug"))
-    (is (unfinished-todo-in? "see, todo"))
-    (is (unfinished-todo-in? "Check TODO"))
-    (is (not (unfinished-todo-in? "TODO later")))
-    (is (not (unfinished-todo-in? "TODO postpone")))
-    (is (not (unfinished-todo-in? "TODO defer")))))
+    (is (unfinished-todo-in? {:group "TODO check bug"}))
+    (is (unfinished-todo-in? {:group "see, todo"}))
+    (is (unfinished-todo-in? {:group "Check TODO"}))
+    (is (not (unfinished-todo-in? {:group "TODO later"})))
+    (is (not (unfinished-todo-in? {:group "TODO postpone"})))
+    (is (not (unfinished-todo-in? {:group "TODO defer"})))))
 
 (deftest test-unfinished-todo-seq
   (testing "test if unfinished-todo-seq work properly"
-    (is (= ["todo check bug"] (unfinished-todo-seq ["TODO check bug"])))
-    (is (= ["see, todo"] (unfinished-todo-seq ["see, todo"])))
-    (is (= ["check todo"] (unfinished-todo-seq ["Check TODO"])))
-    (is (= [] (unfinished-todo-seq ["TODO later"])))
-    (is (= [] (unfinished-todo-seq ["TODO postpone"])))
-    (is (= [] (unfinished-todo-seq ["TODO defer"])))
-    (is (= ["todo" "todo" "tododo"] (unfinished-todo-seq ["TODO" "todo" "tododo"])))
-    (is (= ["todo"] (unfinished-todo-seq ["abc" "todo" "def"])))))
+    (is (= [{:start 0, :end 14,:group "TODO check bug"}] (unfinished-todo-seq [{:start 0, :end 14,:group "TODO check bug"}])))
+    (is (= [{:group "see, todo"}] (unfinished-todo-seq [{:group "see, todo"}])))
+    (is (= [{:group "Check TODO"} ] (unfinished-todo-seq [{:group "Check TODO"} ])))
+    (is (= [] (unfinished-todo-seq [{:group "TODO later"}])))
+    (is (= [] (unfinished-todo-seq [{:group "TODO postpone"}])))
+    (is (= [] (unfinished-todo-seq [{:group "TODO defer"}])))
+    (is (= [{:group "TODO"} {:group "todo"} {:group "tododo"}] (unfinished-todo-seq [{:group "TODO"} {:group "todo"} {:group "tododo"}])))
+    (is (= [{:group "todo"}] (unfinished-todo-seq [{:group "abc"} {:group "todo"} {:group "def"}])))))
 
+(deftest test-concat-message
+  (testing "test concating with todo is correctly working"
+   (is (= "abctodounfinishedtododef" (concat-message "abctododef" "unfinishedtodo" #"todo")))))
+
+(deftest test-unfinished-todo-message
+  (testing "test concating unfinished todo message is correctly working"
+    (is (= "abcabcdefg" (unfinished-todo-message "abcabcdefg" "cs")))
+    (is (= "abca//todo! unfinished TODO \nbcdefg" (unfinished-todo-message "abca//todo\nbcdefg" "cs")))
+    (is (= "abca/*todo! unfinished TODO */bcdefg" (unfinished-todo-message "abca/*todo*/bcdefg" "js")))
+    (is (= "abca<!--todo! unfinished TODO  check properties-->bcdefg" (unfinished-todo-message "abca<!--todo check properties-->bcdefg" "html")))))
