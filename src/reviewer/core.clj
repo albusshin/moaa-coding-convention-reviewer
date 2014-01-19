@@ -78,6 +78,14 @@
                         (concat-message (:group next-comment) message #"todo")
                         (subs code (:end next-comment) (:start (first comments))))))))))
 
+(defn apply-unfinished-todos
+  "Apply coding conventions on unfinished todos"
+  [filename]
+  (let [code (slurp filename)
+        file-extension (last (split filename #"\."))]
+    (spit filename (unfinished-todo-message code file-extension))))
+
 (defn -main
-  [& args]
-  ())
+  [ & args]
+  ()
+  #_(apply-unfinished-todos "/home/albus/Desktop/dummy.cs"))
