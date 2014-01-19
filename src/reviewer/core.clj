@@ -34,15 +34,25 @@
     (code-comments (code file-extension)))))
 
 (defn unfinished-todo-in?
-  "return if the code or file passed in has unfinished TODOs inside"
-  ([comments]
-  (let [comments (map lower-case comments)]
+  "return if the code comment has unfinished TODO inside"
+  [codecomment]
+  (let [codecomment (lower-case codecomment)]
     (every? true? 
-            [(some  #(substring? "todo" %) comments)
-             (not-any? #(substring? "later" %) comments)
-             (not-any? #(substring? "postpone" %) comments)
-             (not-any? #(substring? "defer" %) comments)]))))
+            [(true?  (substring? "todo" codecomment))
+             (false? (substring? "later" codecomment))
+             (false? (substring? "postpone" codecomment))
+             (false? (substring? "defer" codecomment))])))
 
+(defn unfinished-todo-seq
+  "return the seq-pos of the comments with unfinished todo"
+  [comments]
+  (let [comments (map lower-case comments)]
+    (filter unfinished-todo-in? comments)))
+
+(defn unfinished-todo-message
+  "add the unfinished todo message to the whole code"
+  [comments-seq-pos code]
+  ())
 
 (defn -main
   [& args]

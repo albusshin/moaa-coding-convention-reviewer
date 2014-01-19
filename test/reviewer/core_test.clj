@@ -44,13 +44,23 @@
            (code-comments "//bar\nabcdefg/*foo*/fdsa" "js")))
     (is nil? (code-comments "abcdefg" "js"))))
 
-(deftest test-unfinished-todos-in?
+(deftest test-unfinished-todo-in?
   (testing "test if unfinished-todo-in? work properly"
-    (is (unfinished-todo-in? ["TODO check bug"]))
-    (is (unfinished-todo-in? ["see, todo"]))
-    (is (unfinished-todo-in? ["Check TODO"]))
-    (is (not (unfinished-todo-in? ["TODO later"])))
-    (is (not (unfinished-todo-in? ["TODO postpone"])))
-    (is (not (unfinished-todo-in? ["TODO defer"])))
-    (is (every? unfinished-todo-in? [["TODO"] ["todo"] ["tododo"]]))
-    (is (some unfinished-todo-in? [["abc"] ["todo"] ["def"]]))))
+    (is (unfinished-todo-in? "TODO check bug"))
+    (is (unfinished-todo-in? "see, todo"))
+    (is (unfinished-todo-in? "Check TODO"))
+    (is (not (unfinished-todo-in? "TODO later")))
+    (is (not (unfinished-todo-in? "TODO postpone")))
+    (is (not (unfinished-todo-in? "TODO defer")))))
+
+(deftest test-unfinished-todo-seq
+  (testing "test if unfinished-todo-seq work properly"
+    (is (= ["todo check bug"] (unfinished-todo-seq ["TODO check bug"])))
+    (is (= ["see, todo"] (unfinished-todo-seq ["see, todo"])))
+    (is (= ["check todo"] (unfinished-todo-seq ["Check TODO"])))
+    (is (= [] (unfinished-todo-seq ["TODO later"])))
+    (is (= [] (unfinished-todo-seq ["TODO postpone"])))
+    (is (= [] (unfinished-todo-seq ["TODO defer"])))
+    (is (= ["todo" "todo" "tododo"] (unfinished-todo-seq ["TODO" "todo" "tododo"])))
+    (is (= ["todo"] (unfinished-todo-seq ["abc" "todo" "def"])))))
+
