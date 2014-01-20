@@ -85,7 +85,21 @@
         file-extension (last (split filename #"\."))]
     (spit filename (unfinished-todo-message code file-extension))))
 
+(use '[clojure.java.shell :only [sh]])
+(defn compare-branches-apply-fn
+  "Apply apply-fn on the files changed between HEAD and target-branch, on current working dir"
+  [dir target-branch apply-fn]
+  (let [files (map #(str dir %)
+                   (split (:out 
+                            (sh "git" 
+                                "diff" 
+                                "--name-only" 
+                                target-branch
+                                :dir dir ))
+                          #"\n"))]
+    (print files)))
+
 (defn -main
   [ & args]
-  ()
+  (compare-branches-apply-fn "D:\\WorkBenches\\XinTi\\Cpo.HansaCrew\\HansaCrew\\" "origin/master" apply-unfinished-todos)
   #_(apply-unfinished-todos "/home/albus/Desktop/dummy.cs"))
