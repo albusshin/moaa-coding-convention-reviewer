@@ -24,14 +24,11 @@
     (re-seq-pos #"(?:/\*(?:[^*]|(?:\*+[^*/]))*\*+/)|(?://.*)" code)
     "cshtml",
     (re-seq-pos #"(?:@\*(?:[^*]|(?:\*+[^*@]))*\*+@)|<!--.*?-->" code)
-    ("xml" "html"),
+    ("xml" "html" "config" "resx"),
     (re-seq-pos #"<!--.*?-->" code)
     ("css" "less"),
-    (re-seq-pos #"(?:/\*(?:[^*]|(?:\*+[^*/]))*\*+/)" code)))
-  ([filename]
-  (let [file-extension (last (split filename #"\."))
-      code (slurp filename)]
-    (code-comments (code file-extension)))))
+    (re-seq-pos #"(?:/\*(?:[^*]|(?:\*+[^*/]))*\*+/)" code)
+    [])))
 
 (defn unfinished-todo-in?
   "return if the code comment has unfinished TODO inside"
@@ -81,9 +78,10 @@
 (defn apply-unfinished-todos
   "Apply coding conventions on unfinished todos"
   [filename]
-  (let [code (slurp filename)
-        file-extension (last (split filename #"\."))]
-    (spit filename (unfinished-todo-message code file-extension))))
+  (if-not (.exists (clojure.java.io/as-file filename)) nil
+    (let [code (slurp filename)
+          file-extension (last (split filename #"\."))]
+      (spit filename (unfinished-todo-message code file-extension)))))
 
 (use '[clojure.java.shell :only [sh]])
 (defn compare-branches-apply-fn
@@ -97,9 +95,10 @@
                                 target-branch
                                 :dir dir ))
                           #"\n"))]
-    (print files)))
+    (doseq [file files] (apply-fn  file))))
 
 (defn -main
   [ & args]
-  (compare-branches-apply-fn "D:\\WorkBenches\\XinTi\\Cpo.HansaCrew\\HansaCrew\\" "origin/master" apply-unfinished-todos)
-  #_(apply-unfinished-todos "/home/albus/Desktop/dummy.cs"))
+  (do 
+    (compare-branches-apply-fn "D:/WorkBenches/XinTi/Cpo.HansaCrew/HansaCrew/" "origin/master" apply-unfinished-todos)
+    (println "Done")))
