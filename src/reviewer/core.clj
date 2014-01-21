@@ -88,7 +88,8 @@
   "Apply apply-fn on the files changed between HEAD and target-branch, on current working dir"
   [dir target-branch apply-fn]
   (let [files (filter
-                (fn [filename] (last (split filename #"\.")))
+                (fn [filename] (not (empty? (some #{"cs" "js" "cshtml" "xml" "html" "config" "resx" "css" "less"}
+                                                  [(last (split filename #"\."))]))))
                 (map #(str dir "/" %)
                      (split (:out 
                               (sh "git" 
