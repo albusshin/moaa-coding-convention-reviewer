@@ -87,18 +87,25 @@
 (defn compare-branches-apply-fn
   "Apply apply-fn on the files changed between HEAD and target-branch, on current working dir"
   [dir target-branch apply-fn]
-  (let [files (map #(str dir %)
-                   (split (:out 
-                            (sh "git" 
-                                "diff" 
-                                "--name-only" 
-                                target-branch
-                                :dir dir ))
-                          #"\n"))]
+  (let [files (filter
+                (fn [filename] (last (split filename #"\.")))
+                (map #(str dir "/" %)
+                     (split (:out 
+                              (sh "git" 
+                                  "diff" 
+                                  "--name-only" 
+                                  target-branch
+                                  :dir dir ))
+                            #"\n")))]
     (doseq [file files] (apply-fn  file))))
 
 (defn -main
   [ & args]
   (do 
-    (compare-branches-apply-fn "D:/WorkBenches/XinTi/Cpo.HansaCrew/HansaCrew/" "origin/master" apply-unfinished-todos)
+    (if (empty? args) 
+      (compare-branches-apply-fn (System/getProperty "user.dir") "origin/master" apply-unfinished-todos)
+      (if (empty? (rest args))
+          (compare-branches-apply-fn (first args) "origin/master" apply-unfinished-todos)
+          (if (empty? (rest (rest args)))
+              (compare-branches-apply-fn (first args) (first (rest args)) apply-unfinished-todos))))
     (println "Done")))
