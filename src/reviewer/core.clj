@@ -1,6 +1,6 @@
 (ns reviewer.core
-  (:gen-class))
-(use 'clojure.string)
+  (:gen-class)
+  (:use  [clojure.string :only (split lower-case)]))
 
 (defn substring? [sub st]
   (not= (.indexOf st sub) -1))
@@ -9,17 +9,17 @@
   []
   (use 'reviewer.core :reload))
 
-(defn re-seq-pos [pattern string] 
-  (let [m (re-matcher pattern string)] 
-    ((fn step [] 
-      (when (. m find) 
-        (cons {:start (. m start) :end (. m end) :group (. m group)} 
+(defn re-seq-pos [pattern string]
+  (let [m (re-matcher pattern string)]
+    ((fn step []
+      (when (. m find)
+        (cons {:start (. m start) :end (. m end) :group (. m group)}
           (lazy-seq (step))))))))
 
-(defn code-comments 
+(defn code-comments
   "return the comment parts of the source code as a string or a file"
   ([code file-extension]
-  (case file-extension 
+  (case file-extension
     ("cs" "js"),
     (re-seq-pos #"(?:/\*(?:[^*]|(?:\*+[^*/]))*\*+/)|(?://.*)" code)
     "cshtml",
@@ -34,7 +34,7 @@
   "return if the code comment has unfinished TODO inside"
   [codecomment-seq]
   (let [codecomment (lower-case (:group codecomment-seq))]
-    (every? true? 
+    (every? true?
             [(true?  (substring? "todo" codecomment))
              (false? (substring? "later" codecomment))
              (false? (substring? "postpone" codecomment))
@@ -71,7 +71,7 @@
             (recur (:end next-comment)
                    (first comments)
                    (rest comments)
-                   (str return-code 
+                   (str return-code
                         (concat-message (:group next-comment) message #"todo")
                         (subs code (:end next-comment) (:start (first comments))))))))))
 
@@ -91,22 +91,43 @@
                 (fn [filename] (not (empty? (some #{"cs" "js" "cshtml" "xml" "html" "config" "resx" "css" "less"}
                                                   [(last (split filename #"\."))]))))
                 (map #(str dir "/" %)
-                     (split (:out 
-                              (sh "git" 
-                                  "diff" 
-                                  "--name-only" 
+                     (split (:out
+                              (sh "git"
+                                  "diff"
+                                  "--name-only"
                                   target-branch
                                   :dir dir ))
                             #"\n")))]
     (doseq [file files] (apply-fn  file))))
 
+(defn print-help-message
+  []
+  (println "
+           usage: review [repo-dir] [commit|branch]
+
+           repo-dir      : the directory of repository to be checked.
+                           Checking current directory, just trivially type `.`
+                           {default value: current working directory}
+
+           commit|branch : the commit hash or the branch name
+                           as the base of git diff
+                           {default value: \"origin/master\"}
+
+
+           version 0.1.1
+           https://github.com/albusshin/Reviewer
+           Shin
+           "))
+
 (defn -main
   [ & args]
-  (do 
-    (if (empty? args) 
-      (compare-branches-apply-fn (System/getProperty "user.dir") "origin/master" apply-unfinished-todos)
+  (do
+    (if (empty? args)
+        (compare-branches-apply-fn (System/getProperty "user.dir") "origin/master" apply-unfinished-todos)
       (if (empty? (rest args))
-          (compare-branches-apply-fn (first args) "origin/master" apply-unfinished-todos)
-          (if (empty? (rest (rest args)))
-              (compare-branches-apply-fn (first args) (first (rest args)) apply-unfinished-todos))))
+        (if (or (= "-h" (first args)) (= "--help" (first args)))
+          (print-help-message)
+          (compare-branches-apply-fn (first args) "origin/master" apply-unfinished-todos))
+        (if (empty? (rest (rest args)))
+          (compare-branches-apply-fn (first args) (first (rest args)) apply-unfinished-todos))))
     (println "Done")))
